@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 
 class PostsController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth')->except(['index', 'show']);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +20,15 @@ class PostsController extends Controller
      */
     public function index()
     {
-        return view('posts.index');
+        $posts = Post::latest()->get();
+
+        $archives = Post::selectRaw('year(created_at) year, monthname(created_at) month, count(*) published')
+            ->groupBy('year', 'month')
+            ->get()
+            ->toArray();
+
+        dd(archives);
+        return view('posts.index', compact('posts'));
     }
 
     /**
@@ -24,7 +38,7 @@ class PostsController extends Controller
      */
     public function create()
     {
-        //
+        return view('posts.create');
     }
 
     /**
@@ -33,9 +47,32 @@ class PostsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store()
     {
-        //
+        // $post = new Post;
+
+        // $post->title = request('title');
+        // $post->body = request('body');
+
+        // $post->save();
+
+        $this->validate(request(), [
+            'title' => 'required',
+            'body' => 'required',
+        ]);
+
+        auth()->user()->publish(
+            new Post(request(['title', 'body']))
+        );
+
+        // Post::create(
+        //     'title' => request('title'),
+        //     'body' => request('body'),
+        //     'user_id' => auth()->id()
+        // );
+
+        return redirect('/');
+
     }
 
     /**
@@ -46,7 +83,7 @@ class PostsController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        return view('posts.show', compact('post'));
     }
 
     /**
