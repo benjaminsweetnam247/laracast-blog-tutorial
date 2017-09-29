@@ -2,8 +2,7 @@
 
 namespace Blog\Http\Controllers;
 
-use Blog\User;
-use Illuminate\Http\Request;
+use Blog\Http\Requests\RegistrationRequest;
 
 class RegistrationController extends Controller
 {
@@ -12,17 +11,11 @@ class RegistrationController extends Controller
 			return view('registration.create');
 	}
 
-	public function store()
+	public function store(RegistrationRequest $form)
 	{
-		$this->validate(request(), [
-			'name' => 'required',
-			'email' => 'required',
-			'password' => 'required|confirmed'
-		]);
+		$form->persist();
 
-		$user = User::create(request(['name', 'email', 'password']));
-
-		auth()->login($user);
+		session()->flash('message', 'Thanks for all the fish!');
 
 		return redirect()->home();
 	}

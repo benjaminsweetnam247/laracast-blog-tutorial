@@ -3,6 +3,8 @@
 namespace Blog\Http\Controllers;
 
 use Blog\Post;
+use Carbon\Carbon;
+use Blog\Repositories\Posts;
 use Illuminate\Http\Request;
 
 class PostsController extends Controller
@@ -18,16 +20,15 @@ class PostsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Posts $posts)
     {
-        $posts = Post::latest()->get();
 
-        $archives = Post::selectRaw('year(created_at) year, monthname(created_at) month, count(*) published')
-            ->groupBy('year', 'month')
-            ->get()
-            ->toArray();
+        // $posts = $posts->all();
 
-        dd(archives);
+        $posts = Post::latest()
+            ->filter(request(['month', 'year']))
+            ->get();
+
         return view('posts.index', compact('posts'));
     }
 
@@ -53,7 +54,7 @@ class PostsController extends Controller
 
         // $post->title = request('title');
         // $post->body = request('body');
-
+        // $post->user_id = auth()->id();
         // $post->save();
 
         $this->validate(request(), [
@@ -65,11 +66,7 @@ class PostsController extends Controller
             new Post(request(['title', 'body']))
         );
 
-        // Post::create(
-        //     'title' => request('title'),
-        //     'body' => request('body'),
-        //     'user_id' => auth()->id()
-        // );
+        session()->flash('message', 'Your post has now been published');
 
         return redirect('/');
 

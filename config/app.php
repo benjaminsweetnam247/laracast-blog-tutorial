@@ -176,6 +176,7 @@ return [
         // Blog\Providers\BroadcastServiceProvider::class,
         Blog\Providers\EventServiceProvider::class,
         Blog\Providers\RouteServiceProvider::class,
+        
 
     ],
 
